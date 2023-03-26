@@ -16,6 +16,12 @@
     "prepublishOnly": "npm run test && npm run build"
   },
   "bin": "./lib/cli.js",
+  "files": [
+    "src",
+    "lib",
+    "!**/__tests__",
+    "!**/__test_utils__"
+  ],
   "keywords": [],
   "author": "Liu Hong <hongdoit@icloud.com> (https://github.com/YJJA)",
   "license": "MIT",
