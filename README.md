@@ -14,7 +14,7 @@ npm install @openapi-fetch/client
 
 ### Step 2
 
-add .openapi-fetch.json file to project root dir.
+add <code>.openapi-fetch.json</code> file to project root dir.
 
 ```js
 {
