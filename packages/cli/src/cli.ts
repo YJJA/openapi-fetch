@@ -2,7 +2,8 @@
 
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { Validator } from "@cfworker/json-schema";
+import fetch from "node-fetch";
+import Ajv from "ajv";
 import { ApiCompiler } from "./ApiCompiler.js";
 import { paths } from "./paths.js";
 import { ApiConfig } from "./types.js";
@@ -22,15 +23,23 @@ const configJsonContent = await fs.promises.readFile(
 );
 const configJson: ApiConfig = JSON.parse(configJsonContent);
 
-const validator = new Validator({
-  $id: "https://raw.githubusercontent.com/YJJA/openapi-fetch/main/json-schema.json",
-});
-const result = validator.validate(configJson);
+async function loadSchema(url: string) {
+  const response = await fetch(url);
+  return (await response.json()) as any;
+}
 
-if (!result.valid) {
-  console.error(".openapi-fetch.json file parse fail");
-  result.errors.forEach((err) => {
-    console.warn(err.error);
+const schema = await loadSchema(
+  "https://raw.githubusercontent.com/YJJA/openapi-fetch/main/json-schema.json"
+);
+
+const ajv = new Ajv({ validateSchema: false });
+const validate = ajv.compile(schema);
+const valid = validate(configJson);
+
+if (!valid) {
+  console.error(".openapi-fetch.json file validate fail");
+  validate.errors?.forEach((err) => {
+    console.warn(err.message);
   });
   process.exit(1);
 }

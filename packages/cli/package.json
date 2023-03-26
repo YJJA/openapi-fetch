@@ -22,9 +22,11 @@
   "dependencies": {
     "@apidevtools/json-schema-ref-parser": "^10.1.0",
     "@cfworker/json-schema": "^1.12.5",
+    "ajv": "^8.12.0",
     "del-cli": "^5.0.0",
     "lodash-es": "^4.17.21",
     "minimist": "^1.2.8",
+    "node-fetch": "^3.3.1",
     "openapi-types": "^12.1.0",
     "payload-is": "^0.1.5"
   },
