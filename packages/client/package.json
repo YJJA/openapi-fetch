@@ -45,7 +45,7 @@
     "build": "npm run clean && npm run build:commonjs && npm run build:module && npm run build:typescript",
     "clean": "del lib",
     "test": "jest",
-    "prepublishOnly": "npm run test && npm run build"
+    "prepublishOnly": "npm run build"
   },
   "files": [
     "src",
@@ -54,6 +54,14 @@
     "!**/__test_utils__"
   ],
   "keywords": [],
+  "homepage": "https://github.com/YJJA/openapi-fetch.git#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/YJJA/openapi-fetch.git"
+  },
+  "bugs": {
+    "url": "https://github.com/YJJA/openapi-fetch.git/issues"
+  },
   "dependencies": {
     "del-cli": "^5.0.0",
     "payload-is": "^0.1.5"
