@@ -16,7 +16,7 @@ export type ClientRequestConfig<D = any> = {
 export type ClientResponse<T> = {
   status: number;
   statusText: string;
-  data?: T;
+  data: T;
   headers: Headers;
 };
 
