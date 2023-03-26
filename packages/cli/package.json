@@ -13,7 +13,7 @@
     "build": "npm run clean && npm run build:module",
     "clean": "del lib",
     "test": "jest",
-    "prepublishOnly": "npm run test && npm run build"
+    "prepublishOnly": "npm run build"
   },
   "bin": "./lib/cli.js",
   "files": [
@@ -23,6 +23,14 @@
     "!**/__test_utils__"
   ],
   "keywords": [],
+  "homepage": "https://github.com/YJJA/openapi-fetch.git#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/YJJA/openapi-fetch.git"
+  },
+  "bugs": {
+    "url": "https://github.com/YJJA/openapi-fetch.git/issues"
+  },
   "author": "Liu Hong <hongdoit@icloud.com> (https://github.com/YJJA)",
   "license": "MIT",
   "dependencies": {

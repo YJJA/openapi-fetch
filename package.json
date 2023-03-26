@@ -1,6 +1,5 @@
 {
   "name": "openapi-fetch",
-  "private": true,
   "workspaces": [
     "packages/*"
   ],
