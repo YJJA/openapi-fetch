@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "openapi-fetch config json schema",
+  "type": "object",
+  "properties": {
+    "items": {
+      "type": "array",
+      "title": "OpenAPI spec list",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "OpenAPI spec unique name"
+          },
+          "spec": {
+            "type": "string",
+            "title": "OpenAPI spec local file path or remote url"
+          }
+        },
+        "required": ["name", "spec"]
+      },
+      "minItems": 1
+    }
+  },
+  "required": ["items"]
+}

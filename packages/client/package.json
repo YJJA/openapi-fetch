@@ -1,0 +1,63 @@
+{
+  "name": "@openapi-fetch/client",
+  "version": "0.1.0",
+  "description": "",
+  "type": "module",
+  "main": "lib/commonjs/index.js",
+  "module": "lib/module/index.js",
+  "types": "lib/typescript/index.d.ts",
+  "source": "src/index.ts",
+  "react-native": "src/index.ts",
+  "exports": {
+    ".": {
+      "import": "./lib/module/index.js",
+      "require": "./lib/commonjs/index.js",
+      "types": "./lib/typescript/index.d.ts"
+    },
+    "./runtime": {
+      "import": "./lib/module/runtime.js",
+      "require": "./lib/commonjs/runtime.js",
+      "types": "./lib/typescript/runtime.d.ts"
+    },
+    "./styler": {
+      "import": "./lib/module/styler.js",
+      "require": "./lib/commonjs/styler.js",
+      "types": "./lib/typescript/styler.d.ts"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "index": [
+        "lib/typescript/index.d.ts"
+      ],
+      "runtime": [
+        "lib/typescript/runtime.d.ts"
+      ],
+      "styler": [
+        "lib/typescript/styler.d.ts"
+      ]
+    }
+  },
+  "scripts": {
+    "build:commonjs": "tsc -p tsconfig.build.json -m CommonJS --outDir lib/commonjs --declaration false",
+    "build:module": "tsc -p tsconfig.build.json -m ES2015 --outDir lib/module --declaration false",
+    "build:typescript": "tsc -p tsconfig.build.json --declaration --emitDeclarationOnly --outDir lib/typescript",
+    "build": "npm run clean && npm run build:commonjs && npm run build:module && npm run build:typescript",
+    "clean": "del lib",
+    "test": "jest",
+    "prepublishOnly": "npm run test && npm run build"
+  },
+  "files": [
+    "src",
+    "lib",
+    "!**/__tests__",
+    "!**/__test_utils__"
+  ],
+  "keywords": [],
+  "dependencies": {
+    "del-cli": "^5.0.0",
+    "payload-is": "^0.1.5"
+  },
+  "author": "Liu Hong <hongdoit@icloud.com> (https://github.com/YJJA)",
+  "license": "MIT"
+}
