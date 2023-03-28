@@ -589,24 +589,15 @@ export class ApiOperationGenerator {
   }
 
   private createStylerCallWithHeaderSecurity(key: string) {
-    return factory.createCallExpression(
-      factory.createPropertyAccessExpression(
-        factory.createIdentifier(GLOBAL_STYLER_VAR_NAME),
-        factory.createIdentifier("simple")
-      ),
-      undefined,
-      [
-        factory.createAwaitExpression(
-          factory.createCallExpression(
-            factory.createPropertyAccessExpression(
-              factory.createIdentifier(GLOBAL_SECURITY_VAR_NAME),
-              factory.createIdentifier("token")
-            ),
-            undefined,
-            [factory.createStringLiteral(key)]
-          )
+    return factory.createAwaitExpression(
+      factory.createCallExpression(
+        factory.createPropertyAccessExpression(
+          factory.createIdentifier(GLOBAL_SECURITY_VAR_NAME),
+          factory.createIdentifier("token")
         ),
-      ]
+        undefined,
+        [factory.createStringLiteral(key)]
+      )
     );
   }
 }
