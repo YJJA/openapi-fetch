@@ -187,8 +187,8 @@ export function deep(name: string, value: unknown): string | undefined {
  * form
  * [RFC6570]https://tools.ietf.org/html/rfc6570#section-3.2.8
  */
-function delimited(delimiter: string) {
-  return (name: string, value: unknown, explode?: boolean) => {
+function delimited(delimiter: string, defaultExplode: boolean = false) {
+  return (name: string, value: unknown, explode: boolean = defaultExplode) => {
     switch (typeof value) {
       case "symbol":
       case "function":

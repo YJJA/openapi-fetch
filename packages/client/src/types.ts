@@ -1,15 +1,14 @@
 export type ClientRequestConfig<D = any> = {
-  baseURL?: string;
   method?: string;
   headers?: Record<string, string | undefined>;
   body?: D;
   signal?: AbortSignal;
   timeout?: number;
   timeoutErrorMessage?: string;
-  security?: string[];
   env?: {
     fetch: typeof fetch;
     FormData: typeof FormData;
+    URLSearchParams: typeof URLSearchParams;
   };
 };
 
@@ -20,7 +19,10 @@ export type ClientResponse<T> = {
   headers: Headers;
 };
 
-export type GetToken<T> = T | (() => T | Promise<T>);
+export type GetToken<T> =
+  | undefined
+  | T
+  | (() => undefined | T | Promise<undefined | T>);
 
 export type TokenLocation = "header" | "query";
 
@@ -28,9 +30,3 @@ export type BasicTokenType = {
   username: string;
   password: string;
 };
-
-export abstract class TransformPlugin {
-  abstract transform(
-    config: ClientRequestConfig
-  ): ClientRequestConfig | Promise<ClientRequestConfig>;
-}

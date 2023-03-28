@@ -5,16 +5,9 @@ import { ApiSchemaGenerator } from "./ApiSchemaGenerator.js";
 import { ApiSecurityGenerator } from "./ApiSecurityGenerator.js";
 import { ApiServerGenerator } from "./ApiServerGenerator.js";
 import { ApiContextGenerator } from "./ApiContextGenerator.js";
+import { ApiGlobalGenerator } from "./ApiGlobalGenerator.js";
 import { isURL, mergeURL } from "./utils.js";
-import {
-  GLOBAL_RUNTIME_LIB_NAME,
-  GLOBAL_CLIENT_VAR_NAME,
-  GLOBAL_EXPORT_PREFIX,
-  GLOBAL_CLIENT_CLASS_NAME,
-  GLOBAL_RUNTIME_VAR_NAME,
-  GLOBAL_STYLER_VAR_NAME,
-  GLOBAL_STYLER_LIB_NAME,
-} from "./constants.js";
+
 import type { OpenAPIV3 } from "openapi-types";
 import type { ApiItemConfig } from "./types.js";
 
@@ -81,93 +74,18 @@ export class ApiGenerator {
   generate(doc: OpenAPIV3.Document) {
     const context = new ApiContextGenerator(doc, this.config);
     const schema = new ApiSchemaGenerator(context);
+    const globalGenerator = new ApiGlobalGenerator(context);
     const serverGenerator = new ApiServerGenerator(context);
     const securityGenerator = new ApiSecurityGenerator(context);
     const operationGenerator = new ApiPathsGenerator(context, schema);
     const paths = operationGenerator.generate();
 
     return [
-      this.createImportClient(),
-      this.createImportStyler(),
-      this.createVersionVariable(doc.info.version),
-      context.addComment(this.createClientVariable(), {
-        comment: "client",
-      }),
+      ...globalGenerator.generate(),
       ...serverGenerator.generate(),
       ...securityGenerator.generate(),
       ...schema.aliases,
       ...paths,
     ];
-  }
-
-  private createImportClient() {
-    return factory.createImportDeclaration(
-      undefined,
-      factory.createImportClause(
-        false,
-        undefined,
-        factory.createNamespaceImport(
-          factory.createIdentifier(GLOBAL_RUNTIME_VAR_NAME)
-        )
-      ),
-      factory.createStringLiteral(GLOBAL_RUNTIME_LIB_NAME),
-      undefined
-    );
-  }
-
-  private createImportStyler() {
-    return factory.createImportDeclaration(
-      undefined,
-      factory.createImportClause(
-        false,
-        undefined,
-        factory.createNamespaceImport(
-          factory.createIdentifier(GLOBAL_STYLER_VAR_NAME)
-        )
-      ),
-      factory.createStringLiteral(GLOBAL_STYLER_LIB_NAME),
-      undefined
-    );
-  }
-
-  private createVersionVariable(version: string) {
-    return factory.createVariableStatement(
-      [factory.createToken(ts.SyntaxKind.ExportKeyword)],
-      factory.createVariableDeclarationList(
-        [
-          factory.createVariableDeclaration(
-            factory.createIdentifier(`${GLOBAL_EXPORT_PREFIX}version`),
-            undefined,
-            undefined,
-            factory.createStringLiteral(version)
-          ),
-        ],
-        ts.NodeFlags.Const
-      )
-    );
-  }
-
-  private createClientVariable() {
-    return factory.createVariableStatement(
-      [factory.createToken(ts.SyntaxKind.ExportKeyword)],
-      factory.createVariableDeclarationList(
-        [
-          factory.createVariableDeclaration(
-            factory.createIdentifier(GLOBAL_CLIENT_VAR_NAME),
-            undefined,
-            undefined,
-            factory.createNewExpression(
-              factory.createPropertyAccessExpression(
-                factory.createIdentifier(GLOBAL_RUNTIME_VAR_NAME),
-                factory.createIdentifier(GLOBAL_CLIENT_CLASS_NAME)
-              ),
-              undefined,
-              []
-            )
-          ),
-        ],
-        ts.NodeFlags.Const
-      )
-    );
   }
 }

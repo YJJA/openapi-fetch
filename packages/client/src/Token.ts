@@ -1,54 +1,51 @@
-import { isFunction } from "payload-is";
-import type { BasicTokenType, TokenLocation, GetToken } from "./types.js";
+import { isFunction, isUndefined } from "payload-is";
+import type { BasicTokenType, GetToken } from "./types.js";
 
 export class Token<T> {
-  constructor(
-    public readonly location: TokenLocation,
-    public readonly name: string,
-    public readonly token: GetToken<T>
-  ) {}
+  constructor(public readonly token: GetToken<T>) {}
 
   protected async getToken() {
     return isFunction(this.token) ? await this.token() : this.token;
   }
 
-  public async format(): Promise<string> {
+  public async format() {
     const token = await this.getToken();
+    if (isUndefined(token)) {
+      return;
+    }
     return token as string;
   }
 }
 
 export class BasicToken extends Token<BasicTokenType> {
   constructor(token: GetToken<BasicTokenType>) {
-    super("header", "Authorization", token);
+    super(token);
   }
 
   override async format() {
-    const { username, password } = await this.getToken();
-    const token = Buffer.from(`${username}:${password}`).toString("base64");
-    return `Basic ${token}`;
+    const token = await this.getToken();
+    if (isUndefined(token)) {
+      return;
+    }
+    const str = Buffer.from(`${token.username}:${token.password}`).toString(
+      "base64"
+    );
+    return `Basic ${str}`;
   }
 }
 
 export class BearerToken extends Token<string> {
   constructor(token: GetToken<string>) {
-    super("header", "Authorization", token);
+    super(token);
   }
 
   override async format() {
     const token = await this.getToken();
+    if (isUndefined(token)) {
+      return;
+    }
     return `Bearer ${token}`;
   }
 }
 
-export class HeaderToken extends Token<string> {
-  constructor(name: string, token: GetToken<string>) {
-    super("header", name, token);
-  }
-}
-
-export class QueryToken extends Token<string> {
-  constructor(name: string, token: GetToken<string>) {
-    super("query", name, token);
-  }
-}
+export class ApiKeyToken extends Token<string> {}

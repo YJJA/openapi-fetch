@@ -23,11 +23,16 @@
       "import": "./lib/module/styler.js",
       "require": "./lib/commonjs/styler.js",
       "types": "./lib/typescript/styler.d.ts"
+    },
+    "./formatter": {
+      "import": "./lib/module/formatter.js",
+      "require": "./lib/commonjs/formatter.js",
+      "types": "./lib/typescript/formatter.d.ts"
     }
   },
   "typesVersions": {
     "*": {
-      "index": [
+      ".": [
         "lib/typescript/index.d.ts"
       ],
       "runtime": [
@@ -35,6 +40,9 @@
       ],
       "styler": [
         "lib/typescript/styler.d.ts"
+      ],
+      "formatter": [
+        "lib/typescript/formatter.d.ts"
       ]
     }
   },

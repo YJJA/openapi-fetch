@@ -4,8 +4,10 @@ import {
   GLOBAL_SERVER_CLASS_NAME,
   GLOBAL_SERVER_VAR_NAME,
   GLOBAL_SERVER_TYPE_NAME,
-  GLOBAL_CLIENT_VAR_NAME,
   GLOBAL_RUNTIME_VAR_NAME,
+  GLOBAL_SET_SERVER_NAME,
+  GLOBAL_EXPORT_PREFIX,
+  GLOBAL_SET_SERVER_URL_NAME,
 } from "./constants.js";
 import type { ApiContextGenerator } from "./ApiContextGenerator.js";
 
@@ -100,7 +102,7 @@ export class ApiServerGenerator {
     statements.push(
       this.context.addComment(
         factory.createVariableStatement(
-          [factory.createToken(ts.SyntaxKind.ExportKeyword)],
+          undefined,
           factory.createVariableDeclarationList(
             [
               factory.createVariableDeclaration(
@@ -134,16 +136,60 @@ export class ApiServerGenerator {
       )
     );
 
-    // code `$client.use($server);`
     statements.push(
-      factory.createExpressionStatement(
-        factory.createCallExpression(
-          factory.createPropertyAccessExpression(
-            factory.createIdentifier(GLOBAL_CLIENT_VAR_NAME),
-            factory.createIdentifier("use")
-          ),
-          undefined,
-          [factory.createIdentifier(GLOBAL_SERVER_VAR_NAME)]
+      factory.createVariableStatement(
+        [factory.createToken(ts.SyntaxKind.ExportKeyword)],
+        factory.createVariableDeclarationList(
+          [
+            factory.createVariableDeclaration(
+              factory.createIdentifier(
+                `${GLOBAL_EXPORT_PREFIX}${GLOBAL_SET_SERVER_NAME}`
+              ),
+              undefined,
+              undefined,
+              factory.createCallExpression(
+                factory.createPropertyAccessExpression(
+                  factory.createPropertyAccessExpression(
+                    factory.createIdentifier(GLOBAL_SERVER_VAR_NAME),
+                    factory.createIdentifier(GLOBAL_SET_SERVER_NAME)
+                  ),
+                  factory.createIdentifier("bind")
+                ),
+                undefined,
+                [factory.createIdentifier(GLOBAL_SERVER_VAR_NAME)]
+              )
+            ),
+          ],
+          ts.NodeFlags.Const
+        )
+      )
+    );
+
+    statements.push(
+      factory.createVariableStatement(
+        [factory.createToken(ts.SyntaxKind.ExportKeyword)],
+        factory.createVariableDeclarationList(
+          [
+            factory.createVariableDeclaration(
+              factory.createIdentifier(
+                `${GLOBAL_EXPORT_PREFIX}${GLOBAL_SET_SERVER_URL_NAME}`
+              ),
+              undefined,
+              undefined,
+              factory.createCallExpression(
+                factory.createPropertyAccessExpression(
+                  factory.createPropertyAccessExpression(
+                    factory.createIdentifier(GLOBAL_SERVER_VAR_NAME),
+                    factory.createIdentifier(GLOBAL_SET_SERVER_URL_NAME)
+                  ),
+                  factory.createIdentifier("bind")
+                ),
+                undefined,
+                [factory.createIdentifier(GLOBAL_SERVER_VAR_NAME)]
+              )
+            ),
+          ],
+          ts.NodeFlags.Const
         )
       )
     );

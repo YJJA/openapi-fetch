@@ -6,13 +6,17 @@ import { ApiParametersGenerator } from "./ApiParametersGenerator.js";
 import {
   CONFIG_METHOD_KEY,
   CLIENT_CONFIG_KEY,
-  GLOBAL_CLIENT_VAR_NAME,
   CONFIG_PATH_KEY,
   CONFIG_BODY_KEY,
   CONFIG_HEADER_KEY,
   GLOBAL_STYLER_VAR_NAME,
-  CONFIG_SECURITY_KEY,
   CONFIG_QUERY_KEY,
+  GLOBAL_SECURITY_VAR_NAME,
+  GLOBAL_SERVER_VAR_NAME,
+  OPERATION_GET_URL,
+  OPERATION_GET_CONFIG,
+  GLOBAL_FORMATTER_VAR_NAME,
+  GLOBAL_RUNTIME_VAR_NAME,
 } from "./constants.js";
 import type { ApiSchemaGenerator } from "./ApiSchemaGenerator.js";
 import type { ApiContextGenerator } from "./ApiContextGenerator.js";
@@ -31,6 +35,7 @@ export type ApiOperationGeneratorConfig = {
 
 export class ApiOperationGenerator {
   public parameter: ApiParametersGenerator;
+  public securityNames: string[] = [];
 
   constructor(
     private readonly context: ApiContextGenerator,
@@ -42,6 +47,13 @@ export class ApiOperationGenerator {
       this.schema,
       this.config
     );
+
+    this.config.operation.security?.forEach((securityItem) => {
+      const securityName = Object.keys(securityItem)[0];
+      if (isFullString(securityName)) {
+        this.securityNames.push(securityName);
+      }
+    });
   }
 
   /**
@@ -139,6 +151,7 @@ export class ApiOperationGenerator {
         deprecated,
       })
     );
+    statements.push(this.createOperationIdNamespace());
     return statements;
   }
 
@@ -158,7 +171,64 @@ export class ApiOperationGenerator {
       undefined,
       this.parameter.types(),
       undefined,
-      factory.createBlock([this.createReturnBlock()], true)
+      factory.createBlock(this.createReturnBlock(), true)
+    );
+  }
+
+  private createOperationIdNamespace() {
+    const { operationId } = this.config;
+
+    return factory.createModuleDeclaration(
+      [factory.createToken(ts.SyntaxKind.ExportKeyword)],
+      factory.createIdentifier(operationId),
+      factory.createModuleBlock([
+        factory.createFunctionDeclaration(
+          [
+            factory.createToken(ts.SyntaxKind.ExportKeyword),
+            factory.createToken(ts.SyntaxKind.AsyncKeyword),
+          ],
+          undefined,
+          factory.createIdentifier(OPERATION_GET_URL),
+          undefined,
+          this.parameter.types(CONFIG_PATH_KEY, CONFIG_QUERY_KEY),
+          undefined,
+          factory.createBlock(
+            [
+              factory.createReturnStatement(
+                factory.createCallExpression(
+                  factory.createPropertyAccessExpression(
+                    factory.createIdentifier(GLOBAL_SERVER_VAR_NAME),
+                    factory.createIdentifier("path")
+                  ),
+                  undefined,
+                  [this.createUrlTemplateString()]
+                )
+              ),
+            ],
+            true
+          )
+        ),
+        factory.createFunctionDeclaration(
+          [
+            factory.createToken(ts.SyntaxKind.ExportKeyword),
+            factory.createToken(ts.SyntaxKind.AsyncKeyword),
+          ],
+          undefined,
+          factory.createIdentifier(OPERATION_GET_CONFIG),
+          undefined,
+          this.parameter.types(
+            CONFIG_HEADER_KEY,
+            CONFIG_BODY_KEY,
+            CLIENT_CONFIG_KEY
+          ),
+          undefined,
+          factory.createBlock(
+            [factory.createReturnStatement(this.createReturnBlockArguments())],
+            true
+          )
+        ),
+      ]),
+      ts.NodeFlags.Namespace
     );
   }
 
@@ -181,7 +251,28 @@ export class ApiOperationGenerator {
       }
     );
 
+    let queryArgumentsArray: ts.Expression[] = [];
+
     if (this.parameter.has(CONFIG_QUERY_KEY)) {
+      this.parameter.attrs(CONFIG_QUERY_KEY).forEach((name) => {
+        queryArgumentsArray.push(this.createStylerCall(CONFIG_QUERY_KEY, name));
+      });
+    }
+
+    if (this.securityNames.length) {
+      this.securityNames.forEach((securityName) => {
+        const securitySchema =
+          this.context.doc.components?.securitySchemes?.[securityName];
+        const schema = this.context.resolve(securitySchema);
+        if (schema?.type === "apiKey" && schema.in === "query") {
+          queryArgumentsArray.push(
+            this.createStylerCallWithQuerySecurity(securityName, schema.name)
+          );
+        }
+      });
+    }
+
+    if (queryArgumentsArray.length) {
       spans.push({
         expression: factory.createCallExpression(
           factory.createPropertyAccessExpression(
@@ -189,9 +280,7 @@ export class ApiOperationGenerator {
             factory.createIdentifier("query")
           ),
           undefined,
-          this.parameter.attrs(CONFIG_QUERY_KEY).map((name) => {
-            return this.createStylerCall(CONFIG_QUERY_KEY, name);
-          })
+          queryArgumentsArray
         ),
         literal: "",
       });
@@ -218,7 +307,66 @@ export class ApiOperationGenerator {
    * 创建 return
    */
   private createReturnBlock() {
-    const { operation } = this.config;
+    const { operationId, operation } = this.config;
+    const statements: ts.Statement[] = [];
+    const URL_VAR_NAME = "_url";
+    const CFG_VAR_NAME = "_cfg";
+
+    statements.push(
+      factory.createVariableStatement(
+        undefined,
+        factory.createVariableDeclarationList(
+          [
+            factory.createVariableDeclaration(
+              factory.createIdentifier(URL_VAR_NAME),
+              undefined,
+              undefined,
+              factory.createAwaitExpression(
+                factory.createCallExpression(
+                  factory.createPropertyAccessExpression(
+                    factory.createIdentifier(operationId),
+                    factory.createIdentifier(OPERATION_GET_URL)
+                  ),
+                  undefined,
+                  this.parameter.expressions(CONFIG_PATH_KEY, CONFIG_QUERY_KEY)
+                )
+              )
+            ),
+          ],
+          ts.NodeFlags.Const
+        )
+      )
+    );
+
+    statements.push(
+      factory.createVariableStatement(
+        undefined,
+        factory.createVariableDeclarationList(
+          [
+            factory.createVariableDeclaration(
+              factory.createIdentifier(CFG_VAR_NAME),
+              undefined,
+              undefined,
+              factory.createAwaitExpression(
+                factory.createCallExpression(
+                  factory.createPropertyAccessExpression(
+                    factory.createIdentifier(operationId),
+                    factory.createIdentifier(OPERATION_GET_CONFIG)
+                  ),
+                  undefined,
+                  this.parameter.expressions(
+                    CONFIG_HEADER_KEY,
+                    CONFIG_BODY_KEY,
+                    CLIENT_CONFIG_KEY
+                  )
+                )
+              )
+            ),
+          ],
+          ts.NodeFlags.Const
+        )
+      )
+    );
 
     const responseType = this.getResponseType(operation.responses);
     const clientFuncName = camelCase(`fetch ${responseType}`);
@@ -233,16 +381,23 @@ export class ApiOperationGenerator {
       );
     }
 
-    return factory.createReturnStatement(
-      factory.createCallExpression(
-        factory.createPropertyAccessExpression(
-          factory.createIdentifier(GLOBAL_CLIENT_VAR_NAME),
-          factory.createIdentifier(clientFuncName)
-        ),
-        responseType === "json" ? [responseTypeNode] : undefined,
-        [this.createUrlTemplateString(), this.createReturnBlockArguments()]
+    statements.push(
+      factory.createReturnStatement(
+        factory.createCallExpression(
+          factory.createPropertyAccessExpression(
+            factory.createIdentifier(GLOBAL_RUNTIME_VAR_NAME),
+            factory.createIdentifier(clientFuncName)
+          ),
+          responseType === "json" ? [responseTypeNode] : undefined,
+          [
+            factory.createIdentifier(URL_VAR_NAME),
+            factory.createIdentifier(CFG_VAR_NAME),
+          ]
+        )
       )
     );
+
+    return statements;
   }
 
   /**
@@ -256,7 +411,6 @@ export class ApiOperationGenerator {
         ...this.getConfigMethod(),
         ...this.getConfigBody(),
         ...this.getConfigHeaders(),
-        ...this.getConfigSecurity(),
       ],
       true
     );
@@ -267,7 +421,7 @@ export class ApiOperationGenerator {
 
     return factory.createCallExpression(
       factory.createPropertyAccessExpression(
-        factory.createIdentifier(GLOBAL_CLIENT_VAR_NAME),
+        factory.createIdentifier(GLOBAL_FORMATTER_VAR_NAME),
         factory.createIdentifier(bodyFormatter)
       ),
       undefined,
@@ -324,8 +478,46 @@ export class ApiOperationGenerator {
    */
   private getConfigHeaders() {
     const statements: ts.ObjectLiteralElementLike[] = [];
+    const properties: ts.ObjectLiteralElementLike[] = [];
 
-    if (this.parameter.has(CONFIG_HEADER_KEY)) {
+    this.parameter.attrs(CONFIG_HEADER_KEY).forEach((key) => {
+      properties.push(
+        factory.createPropertyAssignment(
+          factory.createIdentifier(key),
+          this.createStylerCall(CONFIG_HEADER_KEY, key)
+        )
+      );
+    });
+
+    if (this.securityNames.length) {
+      this.securityNames.forEach((securityName) => {
+        const securitySchema =
+          this.context.doc.components?.securitySchemes?.[securityName];
+        const schema = this.context.resolve(securitySchema);
+
+        let key: string = "";
+        if (schema?.type === "http") {
+          if (schema.scheme === "basic" || schema.scheme === "bearer") {
+            key = "Authorization";
+          }
+        }
+        if (schema?.type === "apiKey") {
+          if (schema.in === "header") {
+            key = schema.name;
+          }
+        }
+        if (key) {
+          properties.push(
+            factory.createPropertyAssignment(
+              factory.createIdentifier(key),
+              this.createStylerCallWithHeaderSecurity(securityName)
+            )
+          );
+        }
+      });
+    }
+
+    if (properties.length) {
       statements.push(
         factory.createPropertyAssignment(
           factory.createIdentifier(CONFIG_HEADER_KEY),
@@ -339,45 +531,11 @@ export class ApiOperationGenerator {
                 )
               ),
               factory.createSpreadAssignment(
-                factory.createObjectLiteralExpression(
-                  this.parameter.attrs(CONFIG_HEADER_KEY).map((key) => {
-                    return factory.createPropertyAssignment(
-                      factory.createIdentifier(key),
-                      this.createStylerCall(CONFIG_HEADER_KEY, key)
-                    );
-                  }),
-                  true
-                )
+                factory.createObjectLiteralExpression(properties, true)
               ),
             ],
             true
           )
-        )
-      );
-    }
-
-    return statements;
-  }
-
-  /**
-   * security
-   */
-  private getConfigSecurity() {
-    const statements: ts.ObjectLiteralElementLike[] = [];
-
-    const elements: ts.Expression[] = [];
-    this.config.operation.security?.forEach((securityItem) => {
-      const securityName = Object.keys(securityItem)[0];
-      if (isFullString(securityName)) {
-        elements.push(factory.createStringLiteral(securityName));
-      }
-    });
-
-    if (elements.length) {
-      statements.push(
-        factory.createPropertyAssignment(
-          factory.createIdentifier(CONFIG_SECURITY_KEY),
-          factory.createArrayLiteralExpression(elements, true)
         )
       );
     }
@@ -403,6 +561,51 @@ export class ApiOperationGenerator {
           factory.createIdentifier(name)
         ),
         ...(cfg.explode && cfg.style !== "deep" ? [factory.createTrue()] : []),
+      ]
+    );
+  }
+
+  private createStylerCallWithQuerySecurity(key: string, name: string) {
+    return factory.createCallExpression(
+      factory.createPropertyAccessExpression(
+        factory.createIdentifier(GLOBAL_STYLER_VAR_NAME),
+        factory.createIdentifier("form")
+      ),
+      undefined,
+      [
+        factory.createStringLiteral(name),
+        factory.createAwaitExpression(
+          factory.createCallExpression(
+            factory.createPropertyAccessExpression(
+              factory.createIdentifier(GLOBAL_SECURITY_VAR_NAME),
+              factory.createIdentifier("token")
+            ),
+            undefined,
+            [factory.createStringLiteral(key)]
+          )
+        ),
+      ]
+    );
+  }
+
+  private createStylerCallWithHeaderSecurity(key: string) {
+    return factory.createCallExpression(
+      factory.createPropertyAccessExpression(
+        factory.createIdentifier(GLOBAL_STYLER_VAR_NAME),
+        factory.createIdentifier("simple")
+      ),
+      undefined,
+      [
+        factory.createAwaitExpression(
+          factory.createCallExpression(
+            factory.createPropertyAccessExpression(
+              factory.createIdentifier(GLOBAL_SECURITY_VAR_NAME),
+              factory.createIdentifier("token")
+            ),
+            undefined,
+            [factory.createStringLiteral(key)]
+          )
+        ),
       ]
     );
   }

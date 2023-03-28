@@ -4,12 +4,10 @@ import {
   GLOBAL_SECURITY_CLASS_NAME,
   GLOBAL_SET_BASIC_SECURITY_NAME,
   GLOBAL_SET_BEARER_SECURITY_NAME,
-  GLOBAL_SET_HEADER_SECURITY_NAME,
-  GLOBAL_SET_QUERY_SECURITY_NAME,
+  GLOBAL_SET_APIKEY_SECURITY_NAME,
   GLOBAL_SET_SECURITY_NAME,
   GLOBAL_SECURITY_VAR_NAME,
   GLOBAL_EXPORT_PREFIX,
-  GLOBAL_CLIENT_VAR_NAME,
   GLOBAL_RUNTIME_VAR_NAME,
 } from "./constants.js";
 import type { ApiContextGenerator } from "./ApiContextGenerator.js";
@@ -26,7 +24,7 @@ export class ApiSecurityGenerator {
     statements.push(
       this.context.addComment(
         factory.createVariableStatement(
-          [factory.createToken(ts.SyntaxKind.ExportKeyword)],
+          undefined,
           factory.createVariableDeclarationList(
             [
               factory.createVariableDeclaration(
@@ -77,10 +75,8 @@ export class ApiSecurityGenerator {
       } else if (schema.type === "apiKey") {
         argumentsArray.push(factory.createStringLiteral(schema.name));
 
-        if (schema.in === "header") {
-          functionName = GLOBAL_SET_HEADER_SECURITY_NAME;
-        } else if (schema.in === "query") {
-          functionName = GLOBAL_SET_QUERY_SECURITY_NAME;
+        if (schema.in === "header" || schema.in === "query") {
+          functionName = GLOBAL_SET_APIKEY_SECURITY_NAME;
         } else {
           console.warn(`unsupport apiKey in '${schema.in}' in securitySchemes`);
         }
@@ -126,20 +122,6 @@ export class ApiSecurityGenerator {
         )
       );
     });
-
-    // code `$client.use($security);`
-    statements.push(
-      factory.createExpressionStatement(
-        factory.createCallExpression(
-          factory.createPropertyAccessExpression(
-            factory.createIdentifier(GLOBAL_CLIENT_VAR_NAME),
-            factory.createIdentifier("use")
-          ),
-          undefined,
-          [factory.createIdentifier(GLOBAL_SECURITY_VAR_NAME)]
-        )
-      )
-    );
 
     return statements;
   }

@@ -1,7 +1,7 @@
 import { isFullObject, isString, isBoolean, isNumber } from "payload-is";
-import type { ClientRequestConfig, TransformPlugin } from "./types.js";
+import { joinUrl } from "./utils.js";
 
-type ServerConfigMap<T> = {
+export type ServerConfigMap<T> = {
   readonly [P in keyof T]: {
     url: string;
     variables: T[P];
@@ -15,10 +15,8 @@ type TupleIndices<T extends readonly any[]> = Extract<
   ? N
   : never;
 
-export class Server<T extends readonly unknown[] | []>
-  implements TransformPlugin
-{
-  private url?: string;
+export class Server<T extends readonly unknown[] | []> {
+  protected url?: string;
 
   constructor(public readonly configs: ServerConfigMap<T>) {
     if (configs.length) {
@@ -40,11 +38,11 @@ export class Server<T extends readonly unknown[] | []>
     return url;
   }
 
-  public setIndex<K extends TupleIndices<T>>(index: K, variables?: T[K]) {
+  public setServer<K extends TupleIndices<T>>(index: K, variables?: T[K]) {
     this.url = this.generateServerUrl(index, variables);
   }
 
-  public setUrl(url: string) {
+  public setServerUrl(url: string) {
     this.url = url;
   }
 
@@ -52,10 +50,7 @@ export class Server<T extends readonly unknown[] | []>
     return this.url;
   }
 
-  public transform(config: ClientRequestConfig) {
-    if (this.url) {
-      return { ...config, baseURL: this.url };
-    }
-    return config;
+  public path(path: string) {
+    return joinUrl(this.url, path);
   }
 }

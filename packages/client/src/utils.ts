@@ -1,6 +1,6 @@
 import { isNil, isFullObject } from "payload-is";
 import { HttpError } from "./HttpError.js";
-import type { ClientRequestConfig } from "./types.js";
+import type { ClientRequestConfig, ClientResponse } from "./types.js";
 
 type ClientRequestConfigKey = keyof ClientRequestConfig;
 
@@ -28,14 +28,12 @@ export function mergeConfig<T = any>(
   }
 
   const mergeMap: ValueMergeMap<ClientRequestConfig> = {
-    baseURL: simpleMerge,
     method: simpleMerge,
     headers: objectMerge,
     body: simpleMerge,
     signal: simpleMerge,
     timeout: simpleMerge,
     timeoutErrorMessage: simpleMerge,
-    security: simpleMerge,
     env: objectMerge,
   };
 
@@ -68,4 +66,23 @@ export function joinUrl(...parts: Array<string | undefined>) {
 
 export function isHttpError(err: any) {
   return err instanceof HttpError;
+}
+
+export function getResponse<T>(response: Response, data: T): ClientResponse<T> {
+  return {
+    status: response.status,
+    statusText: response.statusText,
+    headers: response.headers,
+    data,
+  };
+}
+
+export function getHeaders(configHeaders?: ClientRequestConfig["headers"]) {
+  const headers = new Headers();
+  Object.entries(configHeaders ?? {}).forEach(([name, value]) => {
+    if (typeof value !== "undefined") {
+      headers.append(name, value);
+    }
+  });
+  return headers;
 }
