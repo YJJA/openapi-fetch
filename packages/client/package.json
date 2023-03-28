@@ -10,39 +10,36 @@
   "react-native": "src/index.ts",
   "exports": {
     ".": {
+      "types": "./lib/typescript/index.d.ts",
       "import": "./lib/module/index.js",
-      "require": "./lib/commonjs/index.js",
-      "types": "./lib/typescript/index.d.ts"
+      "require": "./lib/commonjs/index.js"
     },
     "./runtime": {
+      "types": "./lib/typescript/runtime.d.ts",
       "import": "./lib/module/runtime.js",
-      "require": "./lib/commonjs/runtime.js",
-      "types": "./lib/typescript/runtime.d.ts"
+      "require": "./lib/commonjs/runtime.js"
     },
     "./styler": {
+      "types": "./lib/typescript/styler.d.ts",
       "import": "./lib/module/styler.js",
-      "require": "./lib/commonjs/styler.js",
-      "types": "./lib/typescript/styler.d.ts"
+      "require": "./lib/commonjs/styler.js"
     },
     "./formatter": {
+      "types": "./lib/typescript/formatter.d.ts",
       "import": "./lib/module/formatter.js",
-      "require": "./lib/commonjs/formatter.js",
-      "types": "./lib/typescript/formatter.d.ts"
+      "require": "./lib/commonjs/formatter.js"
     }
   },
   "typesVersions": {
     "*": {
-      ".": [
-        "lib/typescript/index.d.ts"
-      ],
       "runtime": [
-        "lib/typescript/runtime.d.ts"
+        "./lib/typescript/runtime.d.ts"
       ],
       "styler": [
-        "lib/typescript/styler.d.ts"
+        "./lib/typescript/styler.d.ts"
       ],
       "formatter": [
-        "lib/typescript/formatter.d.ts"
+        "./lib/typescript/formatter.d.ts"
       ]
     }
   },
