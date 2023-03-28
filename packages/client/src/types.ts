@@ -1,3 +1,9 @@
+export type ClientRequestEnv = {
+  fetch?: typeof fetch;
+  FormData?: typeof FormData;
+  URLSearchParams?: typeof URLSearchParams;
+};
+
 export type ClientRequestConfig<D = any> = {
   method?: string;
   headers?: Record<string, string | undefined>;
@@ -5,11 +11,7 @@ export type ClientRequestConfig<D = any> = {
   signal?: AbortSignal;
   timeout?: number;
   timeoutErrorMessage?: string;
-  env?: {
-    fetch: typeof fetch;
-    FormData: typeof FormData;
-    URLSearchParams: typeof URLSearchParams;
-  };
+  env?: ClientRequestEnv;
 };
 
 export type ClientResponse<T> = {

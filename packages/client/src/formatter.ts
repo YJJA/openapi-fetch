@@ -1,5 +1,11 @@
 import { ClientRequestConfig } from "./types.js";
 
+export function raw(
+  config: ClientRequestConfig<any>
+): ClientRequestConfig<any> {
+  return config;
+}
+
 export function json({
   body,
   ...config

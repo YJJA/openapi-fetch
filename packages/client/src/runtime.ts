@@ -6,6 +6,7 @@ import { isHttpError, getResponse, getHeaders } from "./utils.js";
 
 import type {
   ClientRequestConfig,
+  ClientRequestEnv,
   ClientResponse,
   BasicTokenType,
   TokenLocation,
@@ -20,6 +21,7 @@ export {
   BearerToken,
   ApiKeyToken,
   ClientRequestConfig,
+  ClientRequestEnv,
   ClientResponse,
   BasicTokenType,
   TokenLocation,

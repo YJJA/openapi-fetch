@@ -56,7 +56,7 @@ export function mergeURL(url: string, ...parts: string[]) {
   return [origin, ...paths].join("/");
 }
 
-export type Formatter = "json" | "urlencoded" | "multipart";
+export type Formatter = "json" | "urlencoded" | "multipart" | "raw";
 
 const contentType2Formatter: Record<string, Formatter> = {
   "application/json": "json",
@@ -71,7 +71,7 @@ export function getBodyFormatter(body?: OpenAPIV3.RequestBodyObject) {
       if (formatter) return formatter;
     }
   }
-  return;
+  return "raw";
 }
 
 export function isStringOrNumberArray(
