@@ -47,10 +47,10 @@
     "build:commonjs": "tsc -p tsconfig.build.json -m CommonJS --outDir lib/commonjs --declaration false",
     "build:module": "tsc -p tsconfig.build.json -m ES2015 --outDir lib/module --declaration false",
     "build:typescript": "tsc -p tsconfig.build.json --declaration --emitDeclarationOnly --outDir lib/typescript",
-    "build": "npm run clean && npm run build:commonjs && npm run build:module && npm run build:typescript",
+    "build": "pnpm run clean && pnpm run build:commonjs && pnpm run build:module && pnpm run build:typescript",
     "clean": "del lib",
-    "test": "jest",
-    "prepublishOnly": "npm run build"
+    "test": "ts-node-esm ./src/__tests__/styler.test.ts",
+    "prepublishOnly": "pnpm run build"
   },
   "files": [
     "src",
@@ -68,9 +68,17 @@
     "url": "https://github.com/YJJA/openapi-fetch.git/issues"
   },
   "dependencies": {
-    "del-cli": "^5.0.0",
     "payload-is": "^0.1.5"
   },
   "author": "Liu Hong <hongdoit@icloud.com> (https://github.com/YJJA)",
-  "license": "MIT"
+  "license": "MIT",
+  "engines": {
+    "node": ">=16.8.0"
+  },
+  "devDependencies": {
+    "@types/node": "^18.14.6",
+    "del-cli": "^5.0.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.2"
+  }
 }
