@@ -1,6 +1,6 @@
 {
   "name": "@openapi-fetch/cli",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Generate TypeScript client with OpenAPI spec.",
   "type": "module",
   "main": "lib/index.js",
