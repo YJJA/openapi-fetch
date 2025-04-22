@@ -1,6 +1,6 @@
 {
   "name": "@openapi-fetch/cli",
-  "version": "0.2.4",
+  "version": "0.3.0",
   "description": "Generate TypeScript client with OpenAPI spec.",
   "type": "module",
   "main": "lib/index.js",
@@ -40,9 +40,9 @@
     "typescript": "catalog:"
   },
   "devDependencies": {
-    "@types/lodash-es": "catalog:",
     "@tsconfig/node-ts": "catalog:",
     "@tsconfig/node20": "catalog:",
+    "@types/lodash-es": "catalog:",
     "@types/node": "catalog:",
     "del-cli": "catalog:"
   },
