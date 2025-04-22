@@ -1,6 +1,6 @@
-import * as fs from "node:fs";
-import * as path from "node:path";
-import { GEN_CONFIG_FILE_NAME, GEN_PACKAGE_NAME } from "./constants.js";
+import fs from "node:fs";
+import path from "node:path";
+import { GEN_CONFIG_FILE_NAME, GEN_PACKAGE_NAME } from "./constants.ts";
 
 const rootDir = fs.realpathSync(process.cwd());
 const resolveApp = (...paths: string[]) => path.resolve(rootDir, ...paths);

@@ -1,14 +1,19 @@
 import ts from "typescript";
 import { get as getPath } from "lodash-es";
-import { isReference, refPathToPropertyPath } from "./utils.js";
 import type { OpenAPIV3 } from "openapi-types";
-import type { ApiItemConfig } from "./types.js";
+import { isReference, refPathToPropertyPath } from "./utils.ts";
+import type { ApiItemConfig } from "./types.ts";
 
 export class ApiContextGenerator {
+  public readonly doc: OpenAPIV3.Document
+  public readonly config: ApiItemConfig
   constructor(
-    public readonly doc: OpenAPIV3.Document,
-    public readonly config: ApiItemConfig
-  ) {}
+    doc: OpenAPIV3.Document,
+    config: ApiItemConfig
+  ) {
+    this.doc = doc;
+    this.config = config;
+  }
 
   resolve<T>(obj: T | OpenAPIV3.ReferenceObject) {
     if (!isReference(obj)) return obj;

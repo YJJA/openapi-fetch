@@ -1,17 +1,19 @@
 import ts from "typescript";
 import { isObject, upperFirst } from "lodash-es";
 import { isFullString, isString, isTrue } from "payload-is";
-import { getRefName, isReference, isStringOrNumberArray } from "./utils.js";
 import type { OpenAPIV3 } from "openapi-types";
-import type { ApiContextGenerator } from "./ApiContextGenerator.js";
+import { getRefName, isReference, isStringOrNumberArray } from "./utils.ts";
+import type { ApiContextGenerator } from "./ApiContextGenerator.ts";
 
 const { factory } = ts;
 
 export class ApiSchemaGenerator {
   private refs: Record<string, ts.TypeReferenceNode> = {};
   public aliases: ts.Statement[] = [];
-
-  constructor(private readonly context: ApiContextGenerator) {}
+  private readonly context: ApiContextGenerator;
+  constructor(context: ApiContextGenerator) {
+    this.context = context;
+  }
 
   /**
    * 从 content 字段中获取 schema, 优先匹配 application/json mime type
@@ -231,9 +233,9 @@ export class ApiSchemaGenerator {
     const type = this.getBaseTypeFromSchema(schema);
     return !isReference(schema) && isTrue(schema?.nullable)
       ? factory.createUnionTypeNode([
-          type,
-          factory.createLiteralTypeNode(factory.createNull()),
-        ])
+        type,
+        factory.createLiteralTypeNode(factory.createNull()),
+      ])
       : type;
   }
 }

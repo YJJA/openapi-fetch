@@ -20,12 +20,12 @@ export {
   BasicToken,
   BearerToken,
   ApiKeyToken,
-  ClientRequestConfig,
-  ClientRequestEnv,
-  ClientResponse,
-  BasicTokenType,
-  TokenLocation,
-  GetToken,
+  type ClientRequestConfig,
+  type ClientRequestEnv,
+  type ClientResponse,
+  type BasicTokenType,
+  type TokenLocation,
+  type GetToken,
   isHttpError,
 };
 
@@ -43,7 +43,7 @@ export async function request(url: string, config: ClientRequestConfig) {
     clearTimeout(timeoutId);
   }
 
-  if ("AbortController" in window && config.timeout) {
+  if ("AbortController" in globalThis && config.timeout) {
     abortController = new AbortController();
     signal = abortController.signal;
     timeoutId = setTimeout(abort, config.timeout);
@@ -67,7 +67,7 @@ export async function request(url: string, config: ClientRequestConfig) {
     let data: any = await response.text();
     try {
       data = JSON.parse(data);
-    } catch {}
+    } catch { }
     throw new HttpError(response.status, data, config, response);
   }
 
@@ -79,8 +79,8 @@ export async function fetchJson<T>(url: string, config: ClientRequestConfig) {
     ...config,
     headers: { Accept: "application/json", ...config.headers },
   });
-  const data: T = await response.json();
-  return getResponse(response, data);
+  const data = await response.json();
+  return getResponse(response, data as T);
 }
 
 export async function fetchText(url: string, config: ClientRequestConfig) {

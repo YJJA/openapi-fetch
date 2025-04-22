@@ -1,6 +1,7 @@
+import fs from 'node:fs'
 import { isNumber, isString } from "payload-is";
-
 import type { OpenAPIV3 } from "openapi-types";
+import path from 'node:path';
 
 export function isReference(obj: unknown): obj is OpenAPIV3.ReferenceObject {
   return typeof obj === "object" && obj !== null && "$ref" in obj;
@@ -78,4 +79,29 @@ export function isStringOrNumberArray(
   list: any[]
 ): list is (string | number)[] {
   return list.every((i) => isNumber(i) || isString(i));
+}
+
+export async function readTypescriptFile(dir: string) {
+  const fileList: string[] = [];
+  const dirnames = await fs.promises.readdir(dir);
+
+  for await (const dirname of dirnames) {
+    const filePath = path.join(dir, dirname);
+    const stat = await fs.promises.stat(filePath);
+    if (stat.isFile() && /\.tsx?$/.test(filePath)) {
+      fileList.push(filePath);
+    } else if (stat.isDirectory()) {
+      const result = await readTypescriptFile(filePath);
+      fileList.push(...result)
+    }
+  }
+
+  return fileList;
+}
+
+export function kebabCase(text: string) {
+  return text
+    .replace(/[^a-zA-Z0-9\s_]/g, " ")
+    .trim()
+    .replace(/[\s_-]+/g, "-");
 }

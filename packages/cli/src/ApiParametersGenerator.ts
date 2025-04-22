@@ -1,6 +1,7 @@
 import ts from "typescript";
 import { groupBy } from "lodash-es";
 import { isBoolean, isUndefined } from "payload-is";
+import type { OpenAPIV3 } from "openapi-types";
 import {
   CONFIG_BODY_KEY,
   CLIENT_CONFIG_KEY,
@@ -9,11 +10,10 @@ import {
   CLIENT_REQUEST_CONFIG_TYPE_NAME,
   CONFIG_PATH_KEY,
   GLOBAL_RUNTIME_VAR_NAME,
-} from "./constants.js";
-import { Formatter, getBodyFormatter } from "./utils.js";
-import type { OpenAPIV3 } from "openapi-types";
-import type { ApiContextGenerator } from "./ApiContextGenerator.js";
-import type { ApiSchemaGenerator } from "./ApiSchemaGenerator.js";
+} from "./constants.ts";
+import { type Formatter, getBodyFormatter } from "./utils.ts";
+import type { ApiContextGenerator } from "./ApiContextGenerator.ts";
+import type { ApiSchemaGenerator } from "./ApiSchemaGenerator.ts";
 
 const { factory } = ts;
 
@@ -49,11 +49,18 @@ export class ApiParametersGenerator {
 
   public bodyFormatter?: Formatter;
 
+  private readonly context: ApiContextGenerator
+  private readonly schema: ApiSchemaGenerator
+  private readonly config: ApiParametersGeneratorConfig
+
   constructor(
-    private readonly context: ApiContextGenerator,
-    private readonly schema: ApiSchemaGenerator,
-    private readonly config: ApiParametersGeneratorConfig
+    context: ApiContextGenerator,
+    schema: ApiSchemaGenerator,
+    config: ApiParametersGeneratorConfig
   ) {
+    this.context = context;
+    this.schema = schema;
+    this.config = config;
     const { operation, pathItem } = this.config;
     this.parameters = this.resolveParameters(
       operation.parameters,

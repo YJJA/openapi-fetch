@@ -77,7 +77,7 @@ export function getResponse<T>(response: Response, data: T): ClientResponse<T> {
   };
 }
 
-export function getHeaders(configHeaders?: ClientRequestConfig["headers"]) {
+export function getHeaders(configHeaders?: Record<string, string | undefined>) {
   const headers = new Headers();
   Object.entries(configHeaders ?? {}).forEach(([name, value]) => {
     if (typeof value !== "undefined") {

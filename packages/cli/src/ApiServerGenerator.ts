@@ -8,13 +8,16 @@ import {
   GLOBAL_SET_SERVER_NAME,
   GLOBAL_EXPORT_PREFIX,
   GLOBAL_SET_SERVER_URL_NAME,
-} from "./constants.js";
-import type { ApiContextGenerator } from "./ApiContextGenerator.js";
+} from "./constants.ts";
+import type { ApiContextGenerator } from "./ApiContextGenerator.ts";
 
 const { factory } = ts;
 
 export class ApiServerGenerator {
-  constructor(private readonly context: ApiContextGenerator) {}
+  private readonly context: ApiContextGenerator
+  constructor(context: ApiContextGenerator) {
+    this.context = context;
+  }
 
   generate() {
     const servers = this.context.doc.servers;
@@ -41,12 +44,12 @@ export class ApiServerGenerator {
               factory.createToken(ts.SyntaxKind.QuestionToken),
               variable.enum?.length
                 ? factory.createUnionTypeNode(
-                    enumList.map((it) =>
-                      factory.createLiteralTypeNode(
-                        factory.createStringLiteral(it)
-                      )
+                  enumList.map((it) =>
+                    factory.createLiteralTypeNode(
+                      factory.createStringLiteral(it)
                     )
                   )
+                )
                 : factory.createKeywordTypeNode(ts.SyntaxKind.StringKeyword)
             )
           );
@@ -77,9 +80,9 @@ export class ApiServerGenerator {
               factory.createIdentifier("variables"),
               itemExpressionElements.length
                 ? factory.createObjectLiteralExpression(
-                    itemExpressionElements,
-                    true
-                  )
+                  itemExpressionElements,
+                  true
+                )
                 : factory.createIdentifier("undefined")
             ),
           ],

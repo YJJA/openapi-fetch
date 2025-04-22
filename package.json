@@ -1,12 +1,7 @@
 {
   "name": "openapi-fetch",
-  "version": "0.0.0",
   "private": true,
   "devDependencies": {
-    "lerna": "^6.5.1"
-  },
-  "engines": {
-    "node": ">=16.8.0"
-  },
-  "packageManager": "pnpm@8.6.11"
+    "lerna": "catalog:"
+  }
 }

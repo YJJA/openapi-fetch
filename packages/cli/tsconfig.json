@@ -1,24 +1,13 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": [
+    "@tsconfig/node20/tsconfig.json",
+    "@tsconfig/node-ts/tsconfig.json"
+  ],
   "compilerOptions": {
-    "lib": ["es2022"],
-    "module": "es2022",
-    "target": "es2022",
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "moduleResolution": "node",
-    "allowUnusedLabels": false,
-    "allowUnreachableCode": false,
-    "noFallthroughCasesInSwitch": true,
-    "noImplicitOverride": true,
-    "noImplicitReturns": true,
-    "noPropertyAccessFromIndexSignature": true,
-    "noUncheckedIndexedAccess": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "checkJs": true
+    "resolveJsonModule": true
   },
-  "include": ["src/**/*"]
+  "include": [
+    "src/*"
+  ]
 }

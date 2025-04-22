@@ -2,7 +2,7 @@ import ts from "typescript";
 import { OpenAPIV3 } from "openapi-types";
 import { isFullObject, isFullString } from "payload-is";
 import { camelCase } from "lodash-es";
-import { ApiParametersGenerator } from "./ApiParametersGenerator.js";
+import { ApiParametersGenerator } from "./ApiParametersGenerator.ts";
 import {
   CONFIG_METHOD_KEY,
   CLIENT_CONFIG_KEY,
@@ -13,13 +13,12 @@ import {
   CONFIG_QUERY_KEY,
   GLOBAL_SECURITY_VAR_NAME,
   GLOBAL_SERVER_VAR_NAME,
-  OPERATION_GET_URL,
-  OPERATION_GET_CONFIG,
   GLOBAL_FORMATTER_VAR_NAME,
   GLOBAL_RUNTIME_VAR_NAME,
-} from "./constants.js";
-import type { ApiSchemaGenerator } from "./ApiSchemaGenerator.js";
-import type { ApiContextGenerator } from "./ApiContextGenerator.js";
+} from "./constants.ts";
+import type { ApiSchemaGenerator } from "./ApiSchemaGenerator.ts";
+import type { ApiContextGenerator } from "./ApiContextGenerator.ts";
+import { kebabCase } from "./utils.ts";
 
 const { factory } = ts;
 
@@ -37,11 +36,17 @@ export class ApiOperationGenerator {
   public parameter: ApiParametersGenerator;
   public securityNames: string[] = [];
 
+  private readonly context: ApiContextGenerator
+  private readonly schema: ApiSchemaGenerator
+  private readonly config: ApiOperationGeneratorConfig
   constructor(
-    private readonly context: ApiContextGenerator,
-    private readonly schema: ApiSchemaGenerator,
-    private readonly config: ApiOperationGeneratorConfig
+    context: ApiContextGenerator,
+    schema: ApiSchemaGenerator,
+    config: ApiOperationGeneratorConfig
   ) {
+    this.context = context;
+    this.schema = schema;
+    this.config = config;
     this.parameter = new ApiParametersGenerator(
       this.context,
       this.schema,
@@ -151,7 +156,6 @@ export class ApiOperationGenerator {
         deprecated,
       })
     );
-    statements.push(this.createOperationIdNamespace());
     return statements;
   }
 
@@ -167,68 +171,11 @@ export class ApiOperationGenerator {
         factory.createToken(ts.SyntaxKind.AsyncKeyword),
       ],
       undefined,
-      factory.createIdentifier(operationId),
+      factory.createIdentifier(kebabCase(operationId)),
       undefined,
       this.parameter.types(),
       undefined,
       factory.createBlock(this.createReturnBlock(), true)
-    );
-  }
-
-  private createOperationIdNamespace() {
-    const { operationId } = this.config;
-
-    return factory.createModuleDeclaration(
-      [factory.createToken(ts.SyntaxKind.ExportKeyword)],
-      factory.createIdentifier(operationId),
-      factory.createModuleBlock([
-        factory.createFunctionDeclaration(
-          [
-            factory.createToken(ts.SyntaxKind.ExportKeyword),
-            factory.createToken(ts.SyntaxKind.AsyncKeyword),
-          ],
-          undefined,
-          factory.createIdentifier(OPERATION_GET_URL),
-          undefined,
-          this.parameter.types(CONFIG_PATH_KEY, CONFIG_QUERY_KEY),
-          undefined,
-          factory.createBlock(
-            [
-              factory.createReturnStatement(
-                factory.createCallExpression(
-                  factory.createPropertyAccessExpression(
-                    factory.createIdentifier(GLOBAL_SERVER_VAR_NAME),
-                    factory.createIdentifier("path")
-                  ),
-                  undefined,
-                  [this.createUrlTemplateString()]
-                )
-              ),
-            ],
-            true
-          )
-        ),
-        factory.createFunctionDeclaration(
-          [
-            factory.createToken(ts.SyntaxKind.ExportKeyword),
-            factory.createToken(ts.SyntaxKind.AsyncKeyword),
-          ],
-          undefined,
-          factory.createIdentifier(OPERATION_GET_CONFIG),
-          undefined,
-          this.parameter.types(
-            CONFIG_HEADER_KEY,
-            CONFIG_BODY_KEY,
-            CLIENT_CONFIG_KEY
-          ),
-          undefined,
-          factory.createBlock(
-            [factory.createReturnStatement(this.createReturnBlockArguments())],
-            true
-          )
-        ),
-      ]),
-      ts.NodeFlags.Namespace
     );
   }
 
@@ -307,10 +254,9 @@ export class ApiOperationGenerator {
    * 创建 return
    */
   private createReturnBlock() {
-    const { operationId, operation } = this.config;
+    const { operation } = this.config;
     const statements: ts.Statement[] = [];
     const URL_VAR_NAME = "_url";
-    const CFG_VAR_NAME = "_cfg";
 
     statements.push(
       factory.createVariableStatement(
@@ -321,45 +267,13 @@ export class ApiOperationGenerator {
               factory.createIdentifier(URL_VAR_NAME),
               undefined,
               undefined,
-              factory.createAwaitExpression(
-                factory.createCallExpression(
-                  factory.createPropertyAccessExpression(
-                    factory.createIdentifier(operationId),
-                    factory.createIdentifier(OPERATION_GET_URL)
-                  ),
-                  undefined,
-                  this.parameter.expressions(CONFIG_PATH_KEY, CONFIG_QUERY_KEY)
-                )
-              )
-            ),
-          ],
-          ts.NodeFlags.Const
-        )
-      )
-    );
-
-    statements.push(
-      factory.createVariableStatement(
-        undefined,
-        factory.createVariableDeclarationList(
-          [
-            factory.createVariableDeclaration(
-              factory.createIdentifier(CFG_VAR_NAME),
-              undefined,
-              undefined,
-              factory.createAwaitExpression(
-                factory.createCallExpression(
-                  factory.createPropertyAccessExpression(
-                    factory.createIdentifier(operationId),
-                    factory.createIdentifier(OPERATION_GET_CONFIG)
-                  ),
-                  undefined,
-                  this.parameter.expressions(
-                    CONFIG_HEADER_KEY,
-                    CONFIG_BODY_KEY,
-                    CLIENT_CONFIG_KEY
-                  )
-                )
+              factory.createCallExpression(
+                factory.createPropertyAccessExpression(
+                  factory.createIdentifier(GLOBAL_SERVER_VAR_NAME),
+                  factory.createIdentifier("path")
+                ),
+                undefined,
+                [this.createUrlTemplateString()]
               )
             ),
           ],
@@ -391,7 +305,7 @@ export class ApiOperationGenerator {
           responseType === "json" ? [responseTypeNode] : undefined,
           [
             factory.createIdentifier(URL_VAR_NAME),
-            factory.createIdentifier(CFG_VAR_NAME),
+            this.createReturnBlockArguments(),
           ]
         )
       )
@@ -530,9 +444,7 @@ export class ApiOperationGenerator {
                   factory.createIdentifier(CONFIG_HEADER_KEY)
                 )
               ),
-              factory.createSpreadAssignment(
-                factory.createObjectLiteralExpression(properties, true)
-              ),
+              ...properties,
             ],
             true
           )

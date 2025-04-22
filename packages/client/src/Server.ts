@@ -17,8 +17,10 @@ type TupleIndices<T extends readonly any[]> = Extract<
 
 export class Server<T extends readonly unknown[] | []> {
   protected url?: string;
+  configs: ServerConfigMap<T>;
 
-  constructor(public readonly configs: ServerConfigMap<T>) {
+  constructor(configs: ServerConfigMap<T>) {
+    this.configs = configs;
     if (configs.length) {
       this.url = this.generateServerUrl(0);
     }

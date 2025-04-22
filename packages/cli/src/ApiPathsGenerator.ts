@@ -1,9 +1,9 @@
 import ts from "typescript";
 import { OpenAPIV3 } from "openapi-types";
 import { isNil } from "payload-is";
-import { ApiOperationGenerator } from "./ApiOperationGenerator.js";
-import type { ApiSchemaGenerator } from "./ApiSchemaGenerator.js";
-import type { ApiContextGenerator } from "./ApiContextGenerator.js";
+import { ApiOperationGenerator } from "./ApiOperationGenerator.ts";
+import type { ApiSchemaGenerator } from "./ApiSchemaGenerator.ts";
+import type { ApiContextGenerator } from "./ApiContextGenerator.ts";
 
 const { HttpMethods } = OpenAPIV3;
 
@@ -19,10 +19,16 @@ export const HttpMethodList = [
 ];
 
 export class ApiPathsGenerator {
+
+  private readonly context: ApiContextGenerator
+  private readonly schema: ApiSchemaGenerator
   constructor(
-    private readonly context: ApiContextGenerator,
-    private readonly schema: ApiSchemaGenerator
-  ) {}
+    context: ApiContextGenerator,
+    schema: ApiSchemaGenerator
+  ) {
+    this.context = context;
+    this.schema = schema;
+  }
 
   skip(tags?: string[]) {
     const config = this.context.config;

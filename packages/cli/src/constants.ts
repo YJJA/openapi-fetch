@@ -1,11 +1,11 @@
 // lib
-export const GLOBAL_RUNTIME_LIB_NAME = "@openapi-fetch/client/runtime";
+export const GLOBAL_RUNTIME_LIB_NAME = "@openapi-fetch/client/lib/runtime";
 export const GLOBAL_RUNTIME_VAR_NAME = "_r";
 
-export const GLOBAL_STYLER_LIB_NAME = "@openapi-fetch/client/styler";
+export const GLOBAL_STYLER_LIB_NAME = "@openapi-fetch/client/lib/styler";
 export const GLOBAL_STYLER_VAR_NAME = "_s";
 
-export const GLOBAL_FORMATTER_LIB_NAME = "@openapi-fetch/client/formatter";
+export const GLOBAL_FORMATTER_LIB_NAME = "@openapi-fetch/client/lib/formatter";
 export const GLOBAL_FORMATTER_VAR_NAME = "_f";
 
 // export prxfix
@@ -37,10 +37,6 @@ export const CONFIG_QUERY_KEY = "query";
 export const CONFIG_HEADER_KEY = "headers";
 export const CONFIG_BODY_KEY = "body";
 export const CLIENT_CONFIG_KEY = "config";
-
-// operation
-export const OPERATION_GET_URL = "url";
-export const OPERATION_GET_CONFIG = "config";
 
 // gen
 export const GEN_PACKAGE_NAME = ".openapi-fetch/client";

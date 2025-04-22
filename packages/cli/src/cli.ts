@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 
-import * as fs from "node:fs";
-import * as path from "node:path";
-import fetch from "node-fetch";
-import Ajv from "ajv";
-import { ApiCompiler } from "./ApiCompiler.js";
-import { paths } from "./paths.js";
-import { ApiConfig } from "./types.js";
+import fs from "node:fs";
+import path from "node:path";
+import { Ajv } from "ajv";
+import { ApiCompiler } from "./ApiCompiler.ts";
+import { paths } from "./paths.ts";
+import type { ApiConfig } from "./types.ts";
+import JsonSchema from '../json-schema.json' with {type: 'json'}
 
 if (!fs.existsSync(paths.configJsonFile)) {
   console.warn(`Can not found '${path.basename(paths.configJsonFile)}' file`);
@@ -23,17 +23,8 @@ const configJsonContent = await fs.promises.readFile(
 );
 const configJson: ApiConfig = JSON.parse(configJsonContent);
 
-async function loadSchema(url: string) {
-  const response = await fetch(url);
-  return (await response.json()) as any;
-}
-
-const schema = await loadSchema(
-  "https://raw.githubusercontent.com/YJJA/openapi-fetch/main/json-schema.json"
-);
-
 const ajv = new Ajv({ validateSchema: false });
-const validate = ajv.compile(schema);
+const validate = ajv.compile(JsonSchema);
 const valid = validate(configJson);
 
 if (!valid) {

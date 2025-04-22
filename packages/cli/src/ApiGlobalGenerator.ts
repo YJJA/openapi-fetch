@@ -1,7 +1,5 @@
 import ts from "typescript";
-import { ApiContextGenerator } from "./ApiContextGenerator";
-
-const { factory } = ts;
+import { ApiContextGenerator } from "./ApiContextGenerator.ts";
 import {
   GLOBAL_RUNTIME_LIB_NAME,
   GLOBAL_EXPORT_PREFIX,
@@ -10,10 +8,15 @@ import {
   GLOBAL_STYLER_LIB_NAME,
   GLOBAL_FORMATTER_LIB_NAME,
   GLOBAL_FORMATTER_VAR_NAME,
-} from "./constants.js";
+} from "./constants.ts";
+
+const { factory } = ts;
 
 export class ApiGlobalGenerator {
-  constructor(private readonly context: ApiContextGenerator) {}
+  private readonly context: ApiContextGenerator
+  constructor(context: ApiContextGenerator) {
+    this.context = context;
+  }
 
   generate() {
     return [

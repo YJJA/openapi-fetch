@@ -1,15 +1,15 @@
 import ts from "typescript";
 import $RefParser from "@apidevtools/json-schema-ref-parser";
-import { ApiPathsGenerator } from "./ApiPathsGenerator.js";
-import { ApiSchemaGenerator } from "./ApiSchemaGenerator.js";
-import { ApiSecurityGenerator } from "./ApiSecurityGenerator.js";
-import { ApiServerGenerator } from "./ApiServerGenerator.js";
-import { ApiContextGenerator } from "./ApiContextGenerator.js";
-import { ApiGlobalGenerator } from "./ApiGlobalGenerator.js";
-import { isURL, mergeURL } from "./utils.js";
+import { ApiPathsGenerator } from "./ApiPathsGenerator.ts";
+import { ApiSchemaGenerator } from "./ApiSchemaGenerator.ts";
+import { ApiSecurityGenerator } from "./ApiSecurityGenerator.ts";
+import { ApiServerGenerator } from "./ApiServerGenerator.ts";
+import { ApiContextGenerator } from "./ApiContextGenerator.ts";
+import { ApiGlobalGenerator } from "./ApiGlobalGenerator.ts";
+import { isURL, mergeURL } from "./utils.ts";
 
 import type { OpenAPIV3 } from "openapi-types";
-import type { ApiItemConfig } from "./types.js";
+import type { ApiItemConfig } from "./types.ts";
 
 const { factory } = ts;
 
@@ -18,7 +18,10 @@ function isOpenApiV3(doc: any): doc is OpenAPIV3.Document {
 }
 
 export class ApiGenerator {
-  constructor(public readonly config: ApiItemConfig) {}
+  public readonly config: ApiItemConfig
+  constructor(config: ApiItemConfig) {
+    this.config = config;
+  }
 
   private fixRelativeServers(servers: OpenAPIV3.ServerObject[] = []) {
     if (!servers.length) {

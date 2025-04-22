@@ -2,7 +2,10 @@ import { isFunction, isUndefined } from "payload-is";
 import type { BasicTokenType, GetToken } from "./types.js";
 
 export class Token<T> {
-  constructor(public readonly token: GetToken<T>) {}
+  public readonly token: GetToken<T>
+  constructor(token: GetToken<T>) {
+    this.token = token;
+  }
 
   protected async getToken() {
     return isFunction(this.token) ? await this.token() : this.token;
@@ -48,4 +51,4 @@ export class BearerToken extends Token<string> {
   }
 }
 
-export class ApiKeyToken extends Token<string> {}
+export class ApiKeyToken extends Token<string> { }

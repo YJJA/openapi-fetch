@@ -1,4 +1,4 @@
-import { ClientRequestConfig } from "./types.js";
+import type { ClientRequestConfig } from "./types.js";
 
 export function raw(
   config: ClientRequestConfig<any>

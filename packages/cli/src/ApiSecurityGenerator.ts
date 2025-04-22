@@ -9,13 +9,16 @@ import {
   GLOBAL_SECURITY_VAR_NAME,
   GLOBAL_EXPORT_PREFIX,
   GLOBAL_RUNTIME_VAR_NAME,
-} from "./constants.js";
-import type { ApiContextGenerator } from "./ApiContextGenerator.js";
+} from "./constants.ts";
+import type { ApiContextGenerator } from "./ApiContextGenerator.ts";
 
 const { factory } = ts;
 
 export class ApiSecurityGenerator {
-  constructor(private readonly context: ApiContextGenerator) {}
+  private readonly context: ApiContextGenerator
+  constructor(context: ApiContextGenerator) {
+    this.context = context;
+  }
 
   generate() {
     const statements: ts.Statement[] = [];
